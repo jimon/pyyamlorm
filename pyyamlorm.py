@@ -80,3 +80,11 @@ def load(yaml_string, class_type, strict = True): # loads yaml string
 
 def dump(objs): # dumps yaml string
 	return yaml.dump({k: dump_obj(v) for k, v in objs.items()})
+
+def loadf(yaml_filename, class_type, strict = True): # loads yaml file
+	with open(yaml_filename, 'r') as f:
+		return load(f.read(), class_type, strict)
+
+def dumpf(yaml_filename, objs): # dumps yaml file
+	with open(yaml_filename, 'w') as f:
+		f.write(dump(objs))
