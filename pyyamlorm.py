@@ -17,12 +17,13 @@ def make_instance(class_type):
 
 # constructs object from data and class_type
 def load_obj(data, class_type, strict = True):
+	data_present = data is not None
 	if strict:
-		assert data, "data must be present"
+		assert data_present, "data must be present"
 
 	# if it's a basic field, we just return data as is, or use default type as a value
 	if is_basic_field(class_type):
-		return data if data else make_instance(class_type)
+		return data if data_present else make_instance(class_type)
 
 	# if it's a list, we will try to see what data type we have
 	elif isinstance(class_type, list):
@@ -44,7 +45,7 @@ def load_obj(data, class_type, strict = True):
 
 	# if it's a dictionary, we will use data as is
 	elif isinstance(class_type, dict):
-		if data or strict:
+		if data_present or strict:
 			assert isinstance(data, dict), 'data for dictionary field also must be dictionary'
 			return data
 		else:
@@ -55,8 +56,8 @@ def load_obj(data, class_type, strict = True):
 		obj = class_type() if callable(class_type) else class_type
 		for k, v in get_orm_fields(obj).items():
 			if strict:
-				assert data.get(k), "can't find value for key %s" % k
-			setattr(obj, k, load_obj(data.get(k) if data else None, v))
+				assert data.get(k) is not None, "can't find value for key %s" % k
+			setattr(obj, k, load_obj(data.get(k) if data_present else None, v))
 		return obj
 
 # dumps objects to dictionary
