@@ -71,7 +71,8 @@ def dump_obj(obj):
 	else:
 		d = {}
 		for k, v in get_orm_fields(obj).items():
-			d[k] = dump_obj(v)
+			if not callable(v):
+				d[k] = dump_obj(v)
 		return d
 
 import yaml
