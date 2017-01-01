@@ -30,18 +30,18 @@ def load_obj(data, class_type, strict = True):
 		assert len(class_type) == 1, 'template list should contain only one value'
 		assert strict and isinstance(data, list), 'data for list field also must be list'
 		if isinstance(data, list): # if data is also a list, we will read it
-			return [load_obj(item, class_type[0]) for item in data]
+			return [load_obj(item, class_type[0], strict = strict) for item in data]
 		else: #if data is not a list, we just create one instance from it
-			return [load_obj(data, class_type[0])]
+			return [load_obj(data, class_type[0], strict = strict)]
 
 	# if it's a set, it's very similar to list
 	elif isinstance(class_type, set):
 		assert len(class_type) == 1, 'template set should contain only one value'
 		assert strict and isinstance(data, list), 'data for set field must be a list'
 		if isinstance(data, list): # if data is also a list, we will read it
-			return set([load_obj(item, next(iter(class_type))) for item in data])
+			return set([load_obj(item, next(iter(class_type)), strict = strict) for item in data])
 		else: #if data is not a list, we just create one instance from it
-			return set([load_obj(data, next(iter(class_type)))])
+			return set([load_obj(data, next(iter(class_type)), strict = strict)])
 
 	# if it's a dictionary, we will use data as is
 	elif isinstance(class_type, dict):
@@ -57,7 +57,7 @@ def load_obj(data, class_type, strict = True):
 		for k, v in get_orm_fields(obj).items():
 			if strict:
 				assert data.get(k) is not None, "can't find value for key %s" % k
-			setattr(obj, k, load_obj(data.get(k) if data_present else None, v))
+			setattr(obj, k, load_obj(data.get(k) if data_present else None, v, strict = strict))
 		return obj
 
 # dumps objects to dictionary
@@ -81,7 +81,7 @@ def load(yaml_string, class_type, strict = True): # loads yaml string
 	return {k: load_obj(v, class_type, strict) for k, v in yaml.load(yaml_string).items()}
 
 def dump(objs): # dumps yaml string
-	return yaml.dump({k: dump_obj(v) for k, v in objs.items()})
+	return yaml.dump({k: dump_obj(v) for k, v in objs.items()}, default_flow_style = False)
 
 def loadf(yaml_filename, class_type, strict = True): # loads yaml file
 	with open(yaml_filename, 'r') as f:
